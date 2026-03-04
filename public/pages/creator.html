@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator — W3eklyBots</title>
+<link rel="icon" href="/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="/css/main.css">
+<style>
+.creator-layout { display: grid; grid-template-columns: 260px 1fr; gap: 0; min-height: calc(100vh - 64px); }
+.creator-sidebar { background: var(--bg2); border-right: 1px solid var(--border); padding: 24px 0; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+.sidebar-section { padding: 0 16px; margin-bottom: 8px; }
+.sidebar-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; padding: 8px 12px 4px; }
+.sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; background: transparent; color: var(--text2); cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 12px; letter-spacing: 0.5px; transition: all 0.2s; text-align: left; }
+.sidebar-btn:hover { background: var(--panel); color: var(--text); }
+.sidebar-btn.active { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(88,101,242,0.2); }
+.sidebar-btn .sb-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.creator-main { padding: 32px; overflow-y: auto; }
+.creator-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+.creator-title { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900; }
+.section { display: none; animation: fadeIn 0.25s ease; }
+.section.active { display: block; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0; }
+.cmd-drag-list { margin-bottom: 12px; min-height: 40px; }
+.cmd-block { padding: 16px; background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; cursor: grab; transition: all 0.2s; }
+.cmd-block:active { cursor: grabbing; }
+.cmd-block.dragging { opacity: 0.4; border-style: dashed; }
+.cmd-block.drag-over { border-color: var(--accent); background: var(--accent-dim); }
+.cmd-block-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.cmd-drag-handle { color: var(--muted); font-size: 18px; flex-shrink: 0; cursor: grab; }
+.cmd-type-badge { font-family: 'Share Tech Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 6px; letter-spacing: 1px; }
+.cmd-type-slash { background: rgba(88,101,242,0.15); color: var(--accent); }
+.cmd-type-prefix { background: rgba(254,231,92,0.15); color: var(--accent3); }
+.cmd-block-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cmd-block-fields .form-group { margin-bottom: 0; }
+.cmd-block-fields input, .cmd-block-fields select, .cmd-block-fields textarea { margin-bottom: 0; }
+.ep-color-bar { height: 4px; border-radius: 2px; background: var(--accent); margin-bottom: 12px; }
+.role-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.role-row input { margin-bottom: 0; flex: 1; }
+.welcome-preview { background: rgba(30,31,34,0.9); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top: 16px; }
+.wp-header { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-bottom: 12px; }
+.wp-msg { background: var(--panel2); border-radius: 8px; padding: 12px; font-size: 14px; color: var(--text); border-left: 3px solid var(--accent2); }
+.code-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.gen-bar { position: sticky; bottom: 0; background: rgba(4,6,9,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; z-index: 50; }
+.gen-bar-info { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text2); }
+@media (max-width: 900px) {
+  .creator-layout { grid-template-columns: 1fr; }
+  .creator-sidebar { position: static; height: auto; display: flex; flex-wrap: wrap; padding: 12px; gap: 4px; border-right: none; border-bottom: 1px solid var(--border); }
+  .sidebar-label { display: none; }
+  .sidebar-section { padding: 0; }
+  .form-row { grid-template-columns: 1fr; }
+  .feature-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="orb orb-a"></div>
+<div class="orb orb-b"></div>
+
+<nav class="navbar">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon" id="navLogoIcon">⚡</div>
+    <div>
+      <div class="nav-logo-text">W3EKLY<span style="color:#5865F2">BOTS</span></div>
+      <span class="nav-logo-sub">CREATOR BETA v1.0.0</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="/dashboard" class="nav-link">Dashboard</a>
+    <span class="nav-link active">Creator</span>
+    <button class="nav-btn nav-btn-ghost" onclick="doLogout()">Log Out</button>
+  </div>
+</nav>
+
+<div style="padding-top:64px;position:relative;z-index:5">
+  <div class="creator-layout">
+
+    <!-- SIDEBAR -->
+    <div class="creator-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Setup</div>
+        <button class="sidebar-btn active" onclick="showSection('basics',this)"><span class="sb-icon">⚙️</span>Bot Basics</button>
+        <button class="sidebar-btn" onclick="showSection('features',this)"><span class="sb-icon">🔧</span>Features</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Commands</div>
+        <button class="sidebar-btn" onclick="showSection('slash',this)"><span class="sb-icon">⚡</span>Slash Commands</button>
+        <button class="sidebar-btn" onclick="showSection('prefix',this)"><span class="sb-icon">📌</span>Prefix Commands</button>
+        <button class="sidebar-btn" onclick="showSection('maker',this)"><span class="sb-icon">🛠️</span>Command Maker</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Appearance</div>
+        <button class="sidebar-btn" onclick="showSection('embed',this)"><span class="sb-icon">🎨</span>Embed Builder</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Server</div>
+        <button class="sidebar-btn" onclick="showSection('autorole',this)"><span class="sb-icon">🎭</span>Auto Role</button>
+        <button class="sidebar-btn" onclick="showSection('welcome',this)"><span class="sb-icon">👋</span>Welcome</button>
+        <button class="sidebar-btn" onclick="showSection('logging',this)"><span class="sb-icon">📋</span>Logging</button>
+        <button class="sidebar-btn" onclick="showSection('moderation',this)"><span class="sb-icon">🛡️</span>Moderation</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Export</div>
+        <button class="sidebar-btn" onclick="showSection('output',this)"><span class="sb-icon">💾</span>Generate Code</button>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="creator-main">
+
+      <!-- BASICS -->
+      <div class="section active" id="sec-basics">
+        <h2 class="creator-title" style="margin-bottom:24px">⚙️ Bot Basics</h2>
+        <div class="grid-2">
+          <div class="panel panel-glow">
+            <div class="panel-title"><span class="panel-dot"></span>IDENTITY</div>
+            <div class="form-group"><label>Bot Name</label><input type="text" id="botName" value="MyBot" placeholder="MyBot"></div>
+            <div class="form-group"><label>Bot Description</label><input type="text" id="botDesc" placeholder="A cool Discord bot"></div>
+            <div class="form-group"><label>Bot Token <span style="color:var(--danger);font-size:10px">⚠️ Keep secret!</span></label>
+              <input type="password" id="botToken" placeholder="Your bot token from Discord Developer Portal">
+            </div>
+          </div>
+          <div class="panel panel-glow">
+            <div class="panel-title"><span class="panel-dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>STATUS</div>
+            <div class="form-group"><label>Status Message</label><input type="text" id="statusMsg" value="Powered by W3eklyBots" placeholder="Status message..."></div>
+            <div class="form-group"><label>Status Type</label>
+              <select id="statusType">
+                <option value="playing">🎮 Playing</option>
+                <option value="watching">👁️ Watching</option>
+                <option value="listening">🎵 Listening to</option>
+                <option value="competing">🏆 Competing in</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Command Prefix</label><input type="text" id="prefix" value="!" placeholder="!" maxlength="5"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEATURES -->
+      <div class="section" id="sec-features">
+        <h2 class="creator-title" style="margin-bottom:24px">🔧 Features</h2>
+        <div class="panel panel-glow">
+          <div class="panel-title"><span class="panel-dot"></span>TOGGLE FEATURES</div>
+          <div class="feature-grid">
+            <label class="check-row"><input type="checkbox" id="feat_slash" checked><span class="check-box"></span><span class="check-label">⚡ Slash Commands</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_prefix" checked><span class="check-box"></span><span class="check-label">📌 Prefix Commands</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_embed" checked><span class="check-box"></span><span class="check-label">🎨 Embed Builder</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_autorole"><span class="check-box"></span><span class="check-label">🎭 Auto Role</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_welcome"><span class="check-box"></span><span class="check-label">👋 Welcome Message</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_logging"><span class="check-box"></span><span class="check-label">📋 Event Logging</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_moderation"><span class="check-box"></span><span class="check-label">🛡️ Moderation</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_reaction"><span class="check-box"></span><span class="check-label">⭐ Reaction Roles</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_dm"><span class="check-box"></span><span class="check-label">💌 DM on Join</span></label>
+            <label class="check-row"><input type="checkbox" id="feat_error" checked><span class="check-box"></span><span class="check-label">🔴 Error Handler</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLASH COMMANDS -->
+      <div class="section" id="sec-slash">
+        <h2 class="creator-title" style="margin-bottom:24px">⚡ Slash Commands</h2>
+        <div class="panel panel-glow">
+          <div class="panel-title"><span class="panel-dot"></span>BUILT-IN SLASH COMMANDS</div>
+          <div class="feature-grid">
+            <label class="check-row"><input type="checkbox" id="sc_ping" checked><span class="check-box"></span><span class="check-label">/ping</span></label>
+            <label class="check-row"><input type="checkbox" id="sc_help" checked><span class="check-box"></span><span class="check-label">/help</span></label>
+            <label class="check-row"><input type="checkbox" id="sc_info"><span class="check-box"></span><span class="check-label">/serverinfo</span></label>
+            <label class="check-row"><input type="checkbox" id="sc_user"><span class="check-box"></span><span class="check-label">/userinfo</span></label>
+            <label class="check-row"><input type="checkbox" id="sc_avatar"><span class="check-box"></span><span class="check-label">/avatar</span></label>
+            <label class="check-row"><input type="checkbox" id="sc_say"><span class="check-box"></span><span class="check-label">/say (admin)</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREFIX COMMANDS -->
+      <div class="section" id="sec-prefix">
+        <h2 class="creator-title" style="margin-bottom:24px">📌 Prefix Commands</h2>
+        <div class="panel panel-glow">
+          <div class="panel-title"><span class="panel-dot" style="background:var(--accent3);box-shadow:0 0 8px var(--accent3)"></span>BUILT-IN PREFIX COMMANDS</div>
+          <p style="color:var(--text2);font-size:13px;margin-bottom:16px">These are always included when Prefix Commands feature is enabled.</p>
+          <div class="feature-grid">
+            <div class="check-row" style="cursor:default;opacity:0.6"><span class="check-box" style="background:var(--accent);border-color:var(--accent)">✓</span><span class="check-label">!ping</span></div>
+            <div class="check-row" style="cursor:default;opacity:0.6"><span class="check-box" style="background:var(--accent);border-color:var(--accent)">✓</span><span class="check-label">!help</span></div>
+          </div>
+          <p style="color:var(--text2);font-size:12px;margin-top:12px;font-family:'Share Tech Mono',monospace">Use Command Maker → to add custom prefix commands.</p>
+        </div>
+      </div>
+
+      <!-- COMMAND MAKER -->
+      <div class="section" id="sec-maker">
+        <h2 class="creator-title" style="margin-bottom:8px">🛠️ Command Maker</h2>
+        <p style="color:var(--text2);margin-bottom:24px;font-size:14px">Drag to reorder. Each command gets added to your generated bot code.</p>
+        <div class="panel panel-glow">
+          <div class="panel-title"><span class="panel-dot"></span>CUSTOM COMMANDS <span style="color:var(--muted);font-size:10px;margin-left:8px">DRAG TO REORDER</span></div>
+          <div id="cmdDragList" class="cmd-drag-list"></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-success" onclick="addCommand('slash')">+ Slash Command</button>
+            <button class="btn btn-ghost" onclick="addCommand('prefix')">+ Prefix Command</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMBED BUILDER -->
+      <div class="section" id="sec-embed">
+        <h2 class="creator-title" style="margin-bottom:24px">🎨 Embed Builder</h2>
+        <div class="grid-2">
+          <div class="panel panel-glow">
+            <div class="panel-title"><span class="panel-dot" style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>EMBED CONFIG</div>
+            <div class="form-group"><label>Title</label><input type="text" id="emTitle" value="Bot Announcement" oninput="updateEmbedPreview()"></div>
+            <div class="form-group"><label>Description</label><textarea id="emDesc" oninput="updateEmbedPreview()">Welcome! Use /help to get started.</textarea></div>
+            <div class="form-row">
+              <div class="form-group"><label>Color</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="color" id="emColorPicker" value="#5865F2" oninput="syncColor(this)" style="width:44px;height:44px;padding:2px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;flex-shrink:0">
+                  <input type="text" id="emColor" value="#5865F2" oninput="syncColorHex(this)" placeholder="#5865F2" style="margin-bottom:0">
+                </div>
+              </div>
+              <div class="form-group"><label>Author Name</label><input type="text" id="emAuthor" value="W3eklyBots" oninput="updateEmbedPreview()"></div>
+            </div>
+            <div class="form-group"><label>Footer</label><input type="text" id="emFooter" value="W3eklyBots • v1.0.0" oninput="updateEmbedPreview()"></div>
+            <div class="form-group"><label>Image URL (optional)</label><input type="text" id="emImage" placeholder="https://..." oninput="updateEmbedPreview()"></div>
+            <div class="form-group"><label>Thumbnail URL (optional)</label><input type="text" id="emThumb" placeholder="https://..." oninput="updateEmbedPreview()"></div>
+          </div>
+          <div class="panel panel-glow">
+            <div class="panel-title"><span class="panel-dot"></span>LIVE PREVIEW</div>
+            <p style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:12px;letter-spacing:1px">DISCORD EMBED PREVIEW</p>
+            <div class="embed-preview" id="embedPrev">
+              <div class="ep-color-bar" id="epColorBar"></div>
+              <div class="ep-author"><div class="ep-author-dot" id="epAuthorDot"></div><span id="epAuthor">W3eklyBots</span></div>
+              <div class="ep-title" id="epTitle">Bot Announcement</div>
+              <div class="ep-desc" id="epDesc">Welcome! Use /help to get started.</div>
+              <div class="ep-fields">
+                <div class="ep-field"><div class="ep-field-name">Status</div><div class="ep-field-val">🟢 Online</div></div>
+                <div class="ep-field"><div class="ep-field-name">Version</div><div class="ep-field-val">v1.0.0</div></div>
+              </div>
+              <div id="epImgWrap"></div>
+              <div class="ep-footer" id="epFooter">W3eklyBots • v1.0.0 | Today</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUTO ROLE -->
+      <div class="section" id="sec-autorole">
+        <h2 class="creator-title" style="margin-bottom:24px">🎭 Auto Role</h2>
+        <div class="grid-2">
+          <div class="panel panel-glow">
+            <div class="panel-title"><span class="panel-dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>ROLE IDs TO ASSIGN ON JOIN</div>
+            <p style="color:var(--text2);font-size:12px;font-family:'Share Tech Mono',monospace;margin-bottom:14px;letter-spacing:1px">Use Role IDs from Discord (right-click role → Copy ID)</p>
+            <div id="roleList"></div>
+            <button class="btn btn-success" style="margin-top:4px;font-size:12px" onclick="addRole()">+ Add Role ID</button>
+          </div>
+          <div class="panel panel-glow">
+            <div class="panel-title"><span class="panel-dot"></span>CHANNEL IDs</div>
+            <div class="form-group"><label>Welcome Channel ID</label><input type="text" id="welcomeChannelId" placeholder="e.g. 1234567890123456789"></div>
+            <div class="form-group"><label>Log Channel ID</label><input type="text" id="logChannelId" placeholder="e.g. 1234567890123456789"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WELCOME -->
+      <div class="section" id="sec-welcome">
+        <h2 class="creator-title" style="margin-bottom:24px">👋 Welcome Message</h2>
+        <div class="panel panel-glow" style="margin-bottom:20px">
+          <div class="panel-title"><span class="panel-dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>WELCOME CONFIG</div>
+          <div class="form-group">
+            <label>Welcome Message <span style="color:var(--muted);font-size:10px">Use {member.mention} and {role}</span></label>
+            <textarea id="welcomeMsg" oninput="updateWelcomePreview()">Welcome to the server, {member.mention}! 🎉 You now have the **{role}** role.</textarea>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><span class="panel-dot"></span>PREVIEW</div>
+          <div class="welcome-preview">
+            <div class="wp-header">WELCOME CHANNEL — #general</div>
+            <div class="wp-msg" id="welcomePrevMsg">Welcome to the server, <strong>@NewMember</strong>! 🎉 You now have the <strong>Member</strong> role.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGGING -->
+      <div class="section" id="sec-logging">
+        <h2 class="creator-title" style="margin-bottom:24px">📋 Event Logging</h2>
+        <div class="panel panel-glow">
+          <div class="panel-title"><span class="panel-dot" style="background:var(--accent3);box-shadow:0 0 8px var(--accent3)"></span>LOG EVENTS</div>
+          <div class="feature-grid">
+            <label class="check-row"><input type="checkbox" id="log_join" checked><span class="check-box"></span><span class="check-label">📥 Member Join</span></label>
+            <label class="check-row"><input type="checkbox" id="log_leave" checked><span class="check-box"></span><span class="check-label">📤 Member Leave</span></label>
+            <label class="check-row"><input type="checkbox" id="log_msg"><span class="check-box"></span><span class="check-label">🗑️ Message Delete</span></label>
+            <label class="check-row"><input type="checkbox" id="log_edit"><span class="check-box"></span><span class="check-label">✏️ Message Edit</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODERATION -->
+      <div class="section" id="sec-moderation">
+        <h2 class="creator-title" style="margin-bottom:24px">🛡️ Moderation</h2>
+        <div class="panel panel-glow">
+          <div class="panel-title"><span class="panel-dot" style="background:var(--danger);box-shadow:0 0 8px var(--danger)"></span>MOD COMMANDS</div>
+          <div class="feature-grid">
+            <label class="check-row"><input type="checkbox" id="mod_kick" checked><span class="check-box"></span><span class="check-label">👢 kick</span></label>
+            <label class="check-row"><input type="checkbox" id="mod_ban" checked><span class="check-box"></span><span class="check-label">🔨 ban</span></label>
+            <label class="check-row"><input type="checkbox" id="mod_mute" checked><span class="check-box"></span><span class="check-label">🔇 mute</span></label>
+            <label class="check-row"><input type="checkbox" id="mod_warn"><span class="check-box"></span><span class="check-label">⚠️ warn</span></label>
+            <label class="check-row"><input type="checkbox" id="mod_clear"><span class="check-box"></span><span class="check-label">🧹 clear</span></label>
+            <label class="check-row"><input type="checkbox" id="mod_unban"><span class="check-box"></span><span class="check-label">✅ unban</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- OUTPUT -->
+      <div class="section" id="sec-output">
+        <h2 class="creator-title" style="margin-bottom:24px">💾 Generated Code</h2>
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="generateAndSave()">⚡ Generate & Save</button>
+          <button class="btn btn-success" id="downloadBtn" onclick="downloadCode()" style="display:none">⬇️ Download bot.py</button>
+          <button class="btn btn-ghost" id="copyBtn" onclick="copyCode()" style="display:none">📋 Copy Code</button>
+        </div>
+        <div id="outputWrap" style="display:none">
+          <div class="code-wrap">
+            <div class="code-header">
+              <div class="code-title">
+                <div class="traffic-lights"><div class="tl tl-r"></div><div class="tl tl-y"></div><div class="tl tl-g"></div></div>
+                <span style="margin-left:12px">📄 bot.py</span>
+              </div>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--accent2)" id="codeLines"></span>
+            </div>
+            <pre class="code-body" id="codeOutput"></pre>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /creator-main -->
+  </div><!-- /creator-layout -->
+
+  <!-- GENERATE BAR -->
+  <div class="gen-bar">
+    <div class="gen-bar-info" id="genBarInfo">Configure your bot using the sidebar, then generate code.</div>
+    <div style="display:flex;gap:10px">
+      <a href="/dashboard" class="btn btn-ghost" style="font-size:12px">← Dashboard</a>
+      <button class="btn btn-primary" onclick="generateAndSave()">⚡ Generate & Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">W3EKLY<span style="color:var(--accent)">BOTS</span></div>
+    <div class="footer-links">
+      <a href="/tos" class="footer-link">Terms of Service</a>
+      <a href="/privacy" class="footer-link">Privacy Policy</a>
+      <a href="/legal" class="footer-link">Legal</a>
+    </div>
+    <div class="footer-copy">W3eklyStudios © 2025 — All rights reserved. W3eklyBots Creator BETA v1.0.0</div>
+  </div>
+</footer>
+
+<script>
+let currentBotId = null;
+let generatedCode = '';
+let commands = [];
+let dragSrcEl = null;
+
+// Load logo
+const savedLogo = localStorage.getItem('w3_logo');
+if (savedLogo) document.getElementById('navLogoIcon').innerHTML = `<img src="${savedLogo}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;position:absolute;inset:0">`;
+
+// ── Sidebar navigation ──
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'output') generateAndSave();
+}
+
+// ── Embed Preview ──
+function syncColor(input) {
+  document.getElementById('emColor').value = input.value.toUpperCase();
+  updateEmbedPreview();
+}
+
+function syncColorHex(input) {
+  if (/^#[0-9A-Fa-f]{6}$/.test(input.value)) {
+    document.getElementById('emColorPicker').value = input.value;
+  }
+  updateEmbedPreview();
+}
+
+function updateEmbedPreview() {
+  const color = document.getElementById('emColor').value || '#5865F2';
+  document.getElementById('epTitle').textContent = document.getElementById('emTitle').value || 'Title';
+  document.getElementById('epDesc').textContent = document.getElementById('emDesc').value || 'Description';
+  document.getElementById('epAuthor').textContent = document.getElementById('emAuthor').value || 'Author';
+  document.getElementById('epFooter').textContent = (document.getElementById('emFooter').value || 'Footer') + ' | Today';
+  document.getElementById('epColorBar').style.background = color;
+  document.getElementById('epAuthorDot').style.background = color;
+  document.getElementById('embedPrev').style.borderLeftColor = color;
+
+  const imgUrl = document.getElementById('emImage').value;
+  const epImgWrap = document.getElementById('epImgWrap');
+  epImgWrap.innerHTML = imgUrl ? `<img src="${imgUrl}" class="ep-img" onerror="this.remove()">` : '';
+}
+
+// ── Welcome Preview ──
+function updateWelcomePreview() {
+  const msg = document.getElementById('welcomeMsg').value
+    .replace('{member.mention}', '<strong>@NewMember</strong>')
+    .replace('{role}', '<strong>Member</strong>');
+  document.getElementById('welcomePrevMsg').innerHTML = msg;
+}
+
+// ── Roles ──
+function addRole() {
+  const div = document.createElement('div');
+  div.className = 'role-row';
+  div.innerHTML = `<input type="text" placeholder="Role ID (e.g. 1234567890123456789)" class="role-id-input"><button class="btn-icon" onclick="this.parentElement.remove()">✕</button>`;
+  div.querySelector('input').style.marginBottom = '0';
+  document.getElementById('roleList').appendChild(div);
+}
+
+function getRoleIds() {
+  return [...document.querySelectorAll('.role-id-input')].map(i => i.value.trim()).filter(Boolean);
+}
+
+// ── Command Maker with Drag & Drop ──
+function addCommand(type) {
+  const id = Date.now();
+  commands.push({ id, type, name: '', description: '', response: '', embedResponse: false, embedTitle: '', embedColor: '#5865F2', ephemeral: false });
+  renderCommands();
+}
+
+function removeCommand(id) {
+  commands = commands.filter(c => c.id !== id);
+  renderCommands();
+}
+
+function updateCommand(id, field, value) {
+  const cmd = commands.find(c => c.id === id);
+  if (cmd) cmd[field] = (field === 'ephemeral' || field === 'embedResponse') ? value : value;
+}
+
+function renderCommands() {
+  const list = document.getElementById('cmdDragList');
+  if (commands.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px">No commands yet. Click a button below to add one.</div>`;
+    return;
+  }
+  list.innerHTML = commands.map(cmd => `
+    <div class="cmd-block" draggable="true" data-id="${cmd.id}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dragDrop(event)">
+      <div class="cmd-block-header">
+        <span class="cmd-drag-handle">⠿</span>
+        <span class="cmd-type-badge ${cmd.type === 'slash' ? 'cmd-type-slash' : 'cmd-type-prefix'}">${cmd.type === 'slash' ? '/slash' : '!prefix'}</span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text);flex:1">${cmd.name || 'unnamed'}</span>
+        <button class="btn-icon" onclick="removeCommand(${cmd.id})">✕</button>
+      </div>
+      <div class="cmd-block-fields">
+        <div class="form-group">
+          <label>Command Name</label>
+          <input type="text" value="${cmd.name}" placeholder="${cmd.type === 'slash' ? 'commandname' : 'commandname'}" oninput="updateCommand(${cmd.id},'name',this.value);renderCommands()">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" value="${cmd.description}" placeholder="What this command does" oninput="updateCommand(${cmd.id},'description',this.value)">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Response Message</label>
+          <input type="text" value="${cmd.response}" placeholder="Message to send..." oninput="updateCommand(${cmd.id},'response',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="check-row" style="margin-bottom:0"><input type="checkbox" ${cmd.embedResponse?'checked':''} onchange="updateCommand(${cmd.id},'embedResponse',this.checked);renderCommands()"><span class="check-box"></span><span class="check-label">Use Embed Response</span></label>
+        </div>
+        <div class="form-group">
+          ${cmd.type === 'slash' ? `<label class="check-row" style="margin-bottom:0"><input type="checkbox" ${cmd.ephemeral?'checked':''} onchange="updateCommand(${cmd.id},'ephemeral',this.checked)"><span class="check-box"></span><span class="check-label">Ephemeral (only sender sees)</span></label>` : '<div></div>'}
+        </div>
+        ${cmd.embedResponse ? `
+        <div class="form-group">
+          <label>Embed Title</label>
+          <input type="text" value="${cmd.embedTitle}" placeholder="Embed title" oninput="updateCommand(${cmd.id},'embedTitle',this.value)">
+        </div>
+        <div class="form-group">
+          <label>Embed Color</label>
+          <input type="color" value="${cmd.embedColor}" oninput="updateCommand(${cmd.id},'embedColor',this.value)" style="width:100%;height:38px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;padding:2px">
+        </div>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// Drag & Drop
+function dragStart(e) {
+  dragSrcEl = e.currentTarget;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => dragSrcEl.classList.add('dragging'), 0);
+}
+
+function dragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+
+function dragDrop(e) {
+  e.stopPropagation();
+  const target = e.currentTarget;
+  target.classList.remove('drag-over');
+  if (dragSrcEl === target) return;
+  const srcId = parseInt(dragSrcEl.dataset.id);
+  const tgtId = parseInt(target.dataset.id);
+  const srcIdx = commands.findIndex(c => c.id === srcId);
+  const tgtIdx = commands.findIndex(c => c.id === tgtId);
+  const [moved] = commands.splice(srcIdx, 1);
+  commands.splice(tgtIdx, 0, moved);
+  renderCommands();
+}
+
+document.getElementById('cmdDragList').addEventListener('dragend', () => {
+  document.querySelectorAll('.cmd-block').forEach(el => el.classList.remove('dragging', 'drag-over'));
+});
+
+// ── Build payload ──
+function buildPayload() {
+  return {
+    name: document.getElementById('botName').value.trim() || 'MyBot',
+    description: document.getElementById('botDesc').value.trim(),
+    token: document.getElementById('botToken').value.trim(),
+    prefix: document.getElementById('prefix').value.trim() || '!',
+    statusMessage: document.getElementById('statusMsg').value.trim(),
+    statusType: document.getElementById('statusType').value,
+    features: {
+      slashCommands: document.getElementById('feat_slash').checked,
+      prefixCommands: document.getElementById('feat_prefix').checked,
+      embedBuilder: document.getElementById('feat_embed').checked,
+      autoRole: document.getElementById('feat_autorole').checked,
+      welcomeMessage: document.getElementById('feat_welcome').checked,
+      logging: document.getElementById('feat_logging').checked,
+      moderation: document.getElementById('feat_moderation').checked,
+      reactionRoles: document.getElementById('feat_reaction').checked,
+      dmOnJoin: document.getElementById('feat_dm').checked,
+      errorHandler: document.getElementById('feat_error').checked
+    },
+    slashBuiltins: {
+      ping: document.getElementById('sc_ping').checked,
+      help: document.getElementById('sc_help').checked,
+      serverinfo: document.getElementById('sc_info').checked,
+      userinfo: document.getElementById('sc_user').checked,
+      avatar: document.getElementById('sc_avatar').checked,
+      say: document.getElementById('sc_say').checked
+    },
+    embed: {
+      title: document.getElementById('emTitle').value,
+      description: document.getElementById('emDesc').value,
+      color: document.getElementById('emColor').value || '#5865F2',
+      footer: document.getElementById('emFooter').value,
+      author: document.getElementById('emAuthor').value,
+      imageUrl: document.getElementById('emImage').value,
+      thumbnailUrl: document.getElementById('emThumb').value
+    },
+    autoRole: {
+      roleIds: getRoleIds(),
+      welcomeChannelId: document.getElementById('welcomeChannelId').value.trim(),
+      logChannelId: document.getElementById('logChannelId').value.trim(),
+      welcomeMessage: document.getElementById('welcomeMsg').value
+    },
+    modCommands: {
+      kick: document.getElementById('mod_kick').checked,
+      ban: document.getElementById('mod_ban').checked,
+      mute: document.getElementById('mod_mute').checked,
+      warn: document.getElementById('mod_warn').checked,
+      clear: document.getElementById('mod_clear').checked,
+      unban: document.getElementById('mod_unban').checked
+    },
+    logEvents: {
+      memberJoin: document.getElementById('log_join').checked,
+      memberLeave: document.getElementById('log_leave').checked,
+      messageDelete: document.getElementById('log_msg').checked,
+      messageEdit: document.getElementById('log_edit').checked
+    },
+    commands: commands.map(c => ({
+      name: c.name, description: c.description, type: c.type,
+      response: c.response, embedResponse: c.embedResponse,
+      embedTitle: c.embedTitle, embedColor: c.embedColor, ephemeral: c.ephemeral
+    }))
+  };
+}
+
+// ── Generate & Save ──
+async function generateAndSave() {
+  if (!document.getElementById('botToken').value.trim()) {
+    showToast('⚠️ Please enter your bot token in Bot Basics', 'error');
+    return;
+  }
+  const payload = buildPayload();
+  document.getElementById('genBarInfo').textContent = 'Saving...';
+
+  try {
+    let res, data;
+    if (currentBotId) {
+      res = await fetch(`/api/bots/${currentBotId}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    } else {
+      res = await fetch('/api/bots', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    }
+    data = await res.json();
+    if (data.error) { showToast('❌ ' + data.error, 'error'); return; }
+    if (data.bot?._id) currentBotId = data.bot._id;
+    generatedCode = data.code || '';
+    showCode(generatedCode);
+    document.getElementById('genBarInfo').textContent = `✅ Saved — ${payload.name}`;
+    showToast('✅ Bot saved and code generated!', 'success');
+
+    // Switch to output
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('sec-output').classList.add('active');
+    document.querySelectorAll('.sidebar-btn').forEach(b => { if (b.textContent.includes('Generate')) b.classList.add('active'); });
+  } catch(e) {
+    showToast('❌ Network error', 'error');
+    console.error(e);
+  }
+}
+
+function showCode(code) {
+  document.getElementById('outputWrap').style.display = 'block';
+  document.getElementById('codeOutput').textContent = code;
+  document.getElementById('codeLines').textContent = code.split('\n').length + ' lines';
+  document.getElementById('downloadBtn').style.display = 'inline-flex';
+  document.getElementById('copyBtn').style.display = 'inline-flex';
+}
+
+function downloadCode() {
+  if (!generatedCode) return;
+  const name = document.getElementById('botName').value.trim() || 'bot';
+  const blob = new Blob([generatedCode], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${name.replace(/\s+/g,'_').toLowerCase()}_bot.py`;
+  a.click();
+  showToast('⬇️ Downloaded!', 'success');
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(generatedCode).then(() => showToast('📋 Copied!', 'success'));
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type?'toast-'+type:''} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function doLogout() {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/';
+}
+
+// Load existing bot if editing
+async function init() {
+  const pathParts = window.location.pathname.split('/');
+  const id = pathParts[2];
+  if (id && id.length > 10) {
+    currentBotId = id;
+    try {
+      const data = await fetch(`/api/bots/${id}`).then(r=>r.json());
+      if (data.bot) loadBot(data.bot);
+    } catch(e) { console.error(e); }
+  }
+  renderCommands();
+  updateEmbedPreview();
+  addRole(); // add one default role row
+}
+
+function loadBot(bot) {
+  document.getElementById('botName').value = bot.name || '';
+  document.getElementById('botDesc').value = bot.description || '';
+  document.getElementById('botToken').value = ''; // token masked
+  document.getElementById('prefix').value = bot.prefix || '!';
+  document.getElementById('statusMsg').value = bot.statusMessage || '';
+  document.getElementById('statusType').value = bot.statusType || 'playing';
+
+  // features
+  if (bot.features) {
+    Object.entries(bot.features).forEach(([k,v]) => {
+      const map = { slashCommands:'feat_slash', prefixCommands:'feat_prefix', embedBuilder:'feat_embed',
+        autoRole:'feat_autorole', welcomeMessage:'feat_welcome', logging:'feat_logging',
+        moderation:'feat_moderation', reactionRoles:'feat_reaction', dmOnJoin:'feat_dm', errorHandler:'feat_error' };
+      if (map[k]) document.getElementById(map[k]).checked = v;
+    });
+  }
+
+  // slash builtins
+  if (bot.slashBuiltins) {
+    Object.entries(bot.slashBuiltins).forEach(([k,v]) => {
+      const map = { ping:'sc_ping', help:'sc_help', serverinfo:'sc_info', userinfo:'sc_user', avatar:'sc_avatar', say:'sc_say' };
+      if (map[k]) document.getElementById(map[k]).checked = v;
+    });
+  }
+
+  // embed
+  if (bot.embed) {
+    document.getElementById('emTitle').value = bot.embed.title || '';
+    document.getElementById('emDesc').value = bot.embed.description || '';
+    document.getElementById('emColor').value = bot.embed.color || '#5865F2';
+    document.getElementById('emColorPicker').value = bot.embed.color || '#5865F2';
+    document.getElementById('emFooter').value = bot.embed.footer || '';
+    document.getElementById('emAuthor').value = bot.embed.author || '';
+    document.getElementById('emImage').value = bot.embed.imageUrl || '';
+    document.getElementById('emThumb').value = bot.embed.thumbnailUrl || '';
+  }
+
+  // autoRole
+  if (bot.autoRole) {
+    document.getElementById('welcomeChannelId').value = bot.autoRole.welcomeChannelId || '';
+    document.getElementById('logChannelId').value = bot.autoRole.logChannelId || '';
+    document.getElementById('welcomeMsg').value = bot.autoRole.welcomeMessage || '';
+    // role ids
+    const list = document.getElementById('roleList');
+    list.innerHTML = '';
+    (bot.autoRole.roleIds || []).forEach(rid => {
+      const div = document.createElement('div');
+      div.className = 'role-row';
+      div.innerHTML = `<input type="text" class="role-id-input" value="${rid}" placeholder="Role ID"><button class="btn-icon" onclick="this.parentElement.remove()">✕</button>`;
+      div.querySelector('input').style.marginBottom = '0';
+      list.appendChild(div);
+    });
+  }
+
+  // mod commands
+  if (bot.modCommands) {
+    Object.entries(bot.modCommands).forEach(([k,v]) => {
+      const el = document.getElementById('mod_'+k);
+      if (el) el.checked = v;
+    });
+  }
+
+  // log events
+  if (bot.logEvents) {
+    const map = { memberJoin:'log_join', memberLeave:'log_leave', messageDelete:'log_msg', messageEdit:'log_edit' };
+    Object.entries(bot.logEvents).forEach(([k,v]) => { if (map[k] && document.getElementById(map[k])) document.getElementById(map[k]).checked = v; });
+  }
+
+  // commands
+  commands = (bot.commands || []).map((c,i) => ({ ...c, id: Date.now()+i }));
+
+  updateEmbedPreview();
+  updateWelcomePreview();
+  renderCommands();
+  document.getElementById('genBarInfo').textContent = `Editing: ${bot.name}`;
+}
+
+init();
+</script>
+</body>
+</html>

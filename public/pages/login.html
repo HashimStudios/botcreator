@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — W3eklyBots</title>
+<link rel="icon" href="/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="/css/main.css">
+<style>
+.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.auth-box { width: 100%; max-width: 420px; }
+.auth-logo { text-align: center; margin-bottom: 40px; }
+.auth-logo-icon { width: 64px; height: 64px; background: var(--accent); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; box-shadow: 0 0 40px rgba(88,101,242,0.5); overflow: hidden; position: relative; }
+.auth-logo-icon img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; border-radius: 18px; }
+.auth-logo h1 { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 4px; }
+.auth-logo p { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 3px; }
+.auth-panel { padding: 36px; }
+.auth-title { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.auth-sub { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
+.auth-footer-text { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text2); }
+.auth-footer-text a { color: var(--accent); text-decoration: none; }
+.auth-footer-text a:hover { text-decoration: underline; }
+.input-wrap { position: relative; margin-bottom: 16px; }
+.input-wrap input { padding-right: 44px; }
+.input-wrap .input-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; pointer-events: none; }
+.btn-full { width: 100%; justify-content: center; padding: 14px; font-size: 14px; letter-spacing: 2px; font-family: 'Orbitron', monospace; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="orb orb-a"></div>
+<div class="orb orb-b"></div>
+
+<div class="auth-page" style="position:relative;z-index:5">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-icon" id="authLogoIcon">⚡</div>
+      <h1>W3EKLY<span style="color:var(--accent)">BOTS</span></h1>
+      <p>CREATOR BETA v1.0.0</p>
+    </div>
+
+    <div class="panel auth-panel">
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-sub">Sign in to access your bots and dashboard</p>
+
+      <div class="alert alert-error" id="errorAlert">⚠️ <span id="errorMsg"></span></div>
+      <div class="alert alert-success" id="successAlert">✅ <span id="successMsg"></span></div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+          <span class="input-icon">✉</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
+          <span class="input-icon">🔒</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()">SIGN IN</button>
+
+      <div class="auth-footer-text">
+        Don't have an account? <a href="/register">Create one</a>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:20px">
+      <a href="/" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:2px;">← BACK TO HOME</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Load logo if set
+const logo = localStorage.getItem('w3_logo');
+if (logo) {
+  const el = document.getElementById('authLogoIcon');
+  el.innerHTML = `<img src="${logo}" alt="logo">`;
+}
+
+function showError(msg) {
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorAlert').classList.add('show');
+  document.getElementById('successAlert').classList.remove('show');
+}
+
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!email || !password) return showError('Please fill in all fields');
+  btn.textContent = 'SIGNING IN...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.error) { showError(data.error); btn.textContent = 'SIGN IN'; btn.disabled = false; }
+    else window.location.href = data.redirect || '/dashboard';
+  } catch { showError('Network error. Try again.'); btn.textContent = 'SIGN IN'; btn.disabled = false; }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+</script>
+</body>
+</html>

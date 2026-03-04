@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W3eklyBots | Creator BETA v1.0.0</title>
+<link rel="icon" id="favicon" href="/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="/css/main.css">
+<style>
+.hero { text-align: center; padding: 100px 24px 60px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(88,101,242,0.1); border: 1px solid rgba(88,101,242,0.3); border-radius: 20px; padding: 6px 16px; margin-bottom: 32px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--accent); letter-spacing: 2px; }
+.hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); box-shadow: 0 0 8px var(--accent2); animation: blink 2s infinite; }
+.hero h1 { font-family: 'Orbitron', monospace; font-size: clamp(36px, 6vw, 72px); font-weight: 900; line-height: 1.1; margin-bottom: 24px; background: linear-gradient(135deg, #fff 0%, #a0aeff 40%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero p { font-size: 18px; color: var(--text2); max-width: 600px; margin: 0 auto 40px; line-height: 1.7; font-weight: 300; }
+.hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.features { padding: 60px 0; }
+.features-title { text-align: center; font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 900; margin-bottom: 12px; }
+.features-sub { text-align: center; color: var(--text2); margin-bottom: 48px; }
+.feat-card { padding: 28px; }
+.feat-icon { font-size: 32px; margin-bottom: 16px; }
+.feat-card h3 { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--text); margin-bottom: 10px; }
+.feat-card p { font-size: 14px; color: var(--text2); line-height: 1.6; font-weight: 300; }
+.stats { display: flex; justify-content: center; gap: 60px; padding: 60px 0; flex-wrap: wrap; }
+.stat-num { font-family: 'Orbitron', monospace; font-size: 48px; font-weight: 900; background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 3px; text-align: center; margin-top: 6px; }
+.cta { text-align: center; padding: 80px 24px; background: linear-gradient(180deg, transparent, rgba(88,101,242,0.04)); border-radius: 20px; margin-bottom: 40px; }
+.cta h2 { font-family: 'Orbitron', monospace; font-size: 32px; font-weight: 900; margin-bottom: 16px; }
+.cta p { color: var(--text2); margin-bottom: 32px; font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="orb orb-a"></div>
+<div class="orb orb-b"></div>
+<div class="orb orb-c"></div>
+
+<nav class="navbar">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon" id="nav-logo-icon">⚡</div>
+    <div>
+      <div class="nav-logo-text">W3EKLY<span style="color:#5865F2">BOTS</span></div>
+      <span class="nav-logo-sub">CREATOR BETA v1.0.0</span>
+    </div>
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="/tos" class="nav-link">Terms</a>
+    <a href="/privacy" class="nav-link">Privacy</a>
+    <a href="/legal" class="nav-link">Legal</a>
+    <a href="/login" class="nav-btn nav-btn-ghost">Log In</a>
+    <a href="/register" class="nav-btn nav-btn-primary">Get Started</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="container">
+    <div class="hero">
+      <div class="hero-badge"><span class="dot"></span> BETA v1.0.0 — NOW LIVE</div>
+      <h1>Build Discord Bots<br>Without Writing Code</h1>
+      <p>Configure slash commands, embeds, auto-roles, moderation, logging and more — then download production-ready Python code instantly.</p>
+      <div class="hero-btns">
+        <a href="/register" class="btn btn-primary btn-large">⚡ Start Creating</a>
+        <a href="/login" class="btn btn-ghost btn-large">Sign In</a>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div>
+        <div class="stat-num">10+</div>
+        <div class="stat-label">FEATURES</div>
+      </div>
+      <div>
+        <div class="stat-num">∞</div>
+        <div class="stat-label">CUSTOM COMMANDS</div>
+      </div>
+      <div>
+        <div class="stat-num">1</div>
+        <div class="stat-label">CLICK EXPORT</div>
+      </div>
+      <div>
+        <div class="stat-num">100%</div>
+        <div class="stat-label">FREE</div>
+      </div>
+    </div>
+
+    <div class="features">
+      <h2 class="features-title">Everything You Need</h2>
+      <p class="features-sub">All the tools to build a powerful Discord bot in minutes</p>
+      <div class="grid-3">
+        <div class="panel feat-card panel-glow">
+          <div class="feat-icon">⚡</div>
+          <h3>SLASH COMMANDS</h3>
+          <p>Build modern Discord slash commands with descriptions, options, permissions, and embed responses.</p>
+        </div>
+        <div class="panel feat-card panel-glow">
+          <div class="feat-icon">🎨</div>
+          <h3>EMBED BUILDER</h3>
+          <p>Create rich embeds with live preview — title, description, color, fields, images and footer.</p>
+        </div>
+        <div class="panel feat-card panel-glow">
+          <div class="feat-icon">🎭</div>
+          <h3>AUTO ROLES</h3>
+          <p>Automatically assign roles when users join. Uses Discord channel and role IDs for precision.</p>
+        </div>
+        <div class="panel feat-card panel-glow">
+          <div class="feat-icon">🛡️</div>
+          <h3>MODERATION</h3>
+          <p>Kick, ban, mute, warn, clear and unban commands with permission checks built in.</p>
+        </div>
+        <div class="panel feat-card panel-glow">
+          <div class="feat-icon">📋</div>
+          <h3>EVENT LOGGING</h3>
+          <p>Log member joins, leaves, message deletes and edits to a dedicated channel by ID.</p>
+        </div>
+        <div class="panel feat-card panel-glow">
+          <div class="feat-icon">💾</div>
+          <h3>SAVE & REVISIT</h3>
+          <p>Your bots are saved to your account. Edit, regenerate and download anytime from your dashboard.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta panel">
+      <h2>Ready to Build Your Bot?</h2>
+      <p>Create your free account and build your first Discord bot in under 5 minutes.</p>
+      <a href="/register" class="btn btn-primary btn-large">⚡ Create Free Account</a>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">W3EKLY<span style="color:var(--accent)">BOTS</span></div>
+    <div class="footer-links">
+      <a href="/tos" class="footer-link">Terms of Service</a>
+      <a href="/privacy" class="footer-link">Privacy Policy</a>
+      <a href="/legal" class="footer-link">Legal</a>
+      <a href="/login" class="footer-link">Login</a>
+      <a href="/register" class="footer-link">Register</a>
+    </div>
+    <div class="footer-copy">W3eklyStudios © 2025 — All rights reserved. W3eklyBots Creator BETA v1.0.0</div>
+  </div>
+</footer>
+
+<script>
+fetch('/api/me').then(r=>r.json()).then(data => {
+  if (data.loggedIn) {
+    const links = document.getElementById('navLinks');
+    links.innerHTML = `<a href="/dashboard" class="nav-link">Dashboard</a><a href="/creator" class="nav-btn nav-btn-primary">⚡ Creator</a>`;
+  }
+});
+</script>
+</body>
+</html>

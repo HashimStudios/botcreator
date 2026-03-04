@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — W3eklyBots</title>
+<link rel="icon" href="/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="/css/main.css">
+<style>
+.dash-header { margin-bottom: 40px; }
+.dash-header h1 { font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 900; margin-bottom: 8px; }
+.dash-header p { color: var(--text2); }
+.dash-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: gap; gap: 16px; }
+.bot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.bot-card { padding: 24px; cursor: pointer; transition: all 0.3s; }
+.bot-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(88,101,242,0.15); }
+.bot-card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.bot-avatar { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent), #7c3aed); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.bot-name { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.bot-date { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+.bot-features { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.feat-tag { font-family: 'Share Tech Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 6px; background: var(--panel2); border: 1px solid var(--border); color: var(--text2); letter-spacing: 1px; }
+.bot-actions { display: flex; gap: 8px; }
+.empty-state { text-align: center; padding: 80px 24px; }
+.empty-icon { font-size: 64px; margin-bottom: 24px; opacity: 0.5; }
+.empty-state h3 { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+.empty-state p { color: var(--text2); margin-bottom: 28px; }
+.delete-modal-btns { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+.settings-btn { font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
+.settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+.logo-upload { display: none; }
+.user-info { display: flex; align-items: center; gap: 12px; }
+.user-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; }
+.user-name { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="orb orb-a"></div>
+<div class="orb orb-b"></div>
+<div class="orb orb-c"></div>
+
+<nav class="navbar">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon" id="navLogoIcon">⚡</div>
+    <div>
+      <div class="nav-logo-text">W3EKLY<span style="color:#5865F2">BOTS</span></div>
+      <span class="nav-logo-sub">CREATOR BETA v1.0.0</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="/dashboard" class="nav-link active">Dashboard</a>
+    <a href="/creator" class="nav-link">Creator</a>
+    <div class="user-info">
+      <div class="user-avatar" id="userInitial">?</div>
+      <span class="user-name" id="userName">Loading...</span>
+    </div>
+    <button class="nav-btn nav-btn-ghost" onclick="doLogout()">Log Out</button>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="container">
+    <div class="dash-top">
+      <div>
+        <h1 style="font-family:'Orbitron',monospace;font-size:26px;font-weight:900;margin-bottom:4px">Your Bots</h1>
+        <p style="color:var(--text2);font-size:14px">Manage and edit your generated Discord bots</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="settings-btn" onclick="document.getElementById('logoUpload').click()">🖼 Set Logo</button>
+        <input type="file" id="logoUpload" class="logo-upload" accept="image/*" onchange="uploadLogo(event)">
+        <button class="settings-btn" onclick="document.getElementById('faviconUpload').click()">🔖 Set Favicon</button>
+        <input type="file" id="faviconUpload" class="logo-upload" accept="image/*" onchange="uploadFavicon(event)">
+        <a href="/creator" class="btn btn-primary">⚡ New Bot</a>
+      </div>
+    </div>
+
+    <div id="botGrid" class="bot-grid">
+      <div class="empty-state full" style="display:none" id="emptyState">
+        <div class="empty-icon">🤖</div>
+        <h3>No Bots Yet</h3>
+        <p>You haven't created any bots yet. Click below to build your first one!</p>
+        <a href="/creator" class="btn btn-primary btn-large">⚡ Create Your First Bot</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDelete()">✕</button>
+    <h3 style="font-family:'Orbitron',monospace;font-size:16px;margin-bottom:12px">⚠️ Delete Bot</h3>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:8px">Are you sure you want to delete <strong id="deleteBotName"></strong>?</p>
+    <p style="color:var(--danger);font-family:'Share Tech Mono',monospace;font-size:12px">This action cannot be undone.</p>
+    <div class="delete-modal-btns">
+      <button class="btn btn-ghost" onclick="closeDelete()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete Bot</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">W3EKLY<span style="color:var(--accent)">BOTS</span></div>
+    <div class="footer-links">
+      <a href="/tos" class="footer-link">Terms of Service</a>
+      <a href="/privacy" class="footer-link">Privacy Policy</a>
+      <a href="/legal" class="footer-link">Legal</a>
+    </div>
+    <div class="footer-copy">W3eklyStudios © 2025 — All rights reserved. W3eklyBots Creator BETA v1.0.0</div>
+  </div>
+</footer>
+
+<script>
+let deleteId = null;
+
+// Load logo/favicon from localStorage
+const savedLogo = localStorage.getItem('w3_logo');
+const savedFav = localStorage.getItem('w3_favicon');
+if (savedLogo) document.getElementById('navLogoIcon').innerHTML = `<img src="${savedLogo}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;position:absolute;inset:0">`;
+if (savedFav) { const lnk = document.getElementById('favicon') || document.createElement('link'); lnk.rel='icon'; lnk.href=savedFav; document.head.appendChild(lnk); }
+
+function uploadLogo(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    localStorage.setItem('w3_logo', ev.target.result);
+    document.getElementById('navLogoIcon').innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;position:absolute;inset:0">`;
+    showToast('Logo updated!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function uploadFavicon(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    localStorage.setItem('w3_favicon', ev.target.result);
+    let lnk = document.querySelector('link[rel=icon]') || document.createElement('link');
+    lnk.rel = 'icon'; lnk.href = ev.target.result;
+    document.head.appendChild(lnk);
+    showToast('Favicon updated!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function loadUser() {
+  const me = await fetch('/api/me').then(r=>r.json());
+  if (!me.loggedIn) { window.location.href = '/login'; return; }
+  document.getElementById('userName').textContent = me.username;
+  document.getElementById('userInitial').textContent = me.username[0].toUpperCase();
+}
+
+async function loadBots() {
+  try {
+    const data = await fetch('/api/bots').then(r=>r.json());
+    const grid = document.getElementById('botGrid');
+    if (!data.bots || data.bots.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:80px 24px">
+        <div style="font-size:64px;margin-bottom:24px;opacity:0.5">🤖</div>
+        <h3 style="font-family:'Orbitron',monospace;font-size:20px;margin-bottom:12px">No Bots Yet</h3>
+        <p style="color:var(--text2);margin-bottom:28px">You haven't created any bots yet.</p>
+        <a href="/creator" class="btn btn-primary btn-large">⚡ Create Your First Bot</a>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = data.bots.map(bot => {
+      const features = [];
+      if (bot.features?.slashCommands) features.push('/ Slash');
+      if (bot.features?.autoRole) features.push('🎭 AutoRole');
+      if (bot.features?.welcomeMessage) features.push('👋 Welcome');
+      if (bot.features?.moderation) features.push('🛡️ Mod');
+      if (bot.features?.logging) features.push('📋 Logging');
+      const date = new Date(bot.updatedAt).toLocaleDateString();
+      return `
+        <div class="panel bot-card panel-glow" onclick="editBot('${bot._id}')">
+          <div class="bot-card-header">
+            <div class="bot-avatar">🤖</div>
+            <div>
+              <div class="bot-name">${bot.name}</div>
+              <div class="bot-date">Updated ${date}</div>
+            </div>
+          </div>
+          <div class="bot-features">
+            ${features.map(f=>`<span class="feat-tag">${f}</span>`).join('')}
+            ${(bot.commands||[]).length > 0 ? `<span class="feat-tag">⚡ ${bot.commands.length} cmd${bot.commands.length!==1?'s':''}</span>` : ''}
+          </div>
+          <div class="bot-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-ghost" style="flex:1;justify-content:center;font-size:12px" onclick="editBot('${bot._id}')">✏️ Edit</button>
+            <button class="btn btn-success" style="font-size:12px" onclick="getCode('${bot._id}','${bot.name}')">⬇️ Code</button>
+            <button class="btn btn-danger" style="font-size:12px" onclick="askDelete('${bot._id}','${bot.name}')">🗑</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+function editBot(id) { window.location.href = `/creator/${id}`; }
+
+async function getCode(id, name) {
+  showToast('Fetching code...', '');
+  const data = await fetch(`/api/bots/${id}/code`).then(r=>r.json());
+  if (!data.code) return showToast('Failed to get code', 'error');
+  const blob = new Blob([data.code], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${name.replace(/\s+/g,'_').toLowerCase()}_bot.py`;
+  a.click();
+  showToast('✅ Code downloaded!', 'success');
+}
+
+function askDelete(id, name) {
+  deleteId = id;
+  document.getElementById('deleteBotName').textContent = name;
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDelete() {
+  deleteId = null;
+  document.getElementById('deleteModal').classList.remove('open');
+}
+
+async function confirmDelete() {
+  if (!deleteId) return;
+  await fetch(`/api/bots/${deleteId}`, { method: 'DELETE' });
+  closeDelete();
+  showToast('Bot deleted', 'success');
+  loadBots();
+}
+
+async function doLogout() {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/';
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type ? 'toast-'+type : ''} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+loadUser();
+loadBots();
+</script>
+</body>
+</html>
